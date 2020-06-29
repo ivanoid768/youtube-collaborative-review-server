@@ -1,0 +1,7 @@
+interface IRoom {
+
+}
+
+interface IUser {
+
+}
