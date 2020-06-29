@@ -1,0 +1,1 @@
+export const rooms: Map<string, IRoom> = new Map()
