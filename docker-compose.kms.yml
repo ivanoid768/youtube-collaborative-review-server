@@ -1,0 +1,10 @@
+version: '3.5'
+
+services:
+  kurento:
+    container_name: yt-kurento
+    image: kurento/kurento-media-server:latest
+    restart: always
+    network_mode: host
+    ports:
+      - 8888:8888

@@ -1,8 +1,9 @@
-import {startAPI} from './api';
+// import {startAPI} from './api';
+import { startMediaServer } from './media_api';
 
 const main = async () => {
-
-	startAPI();
+	await startMediaServer()
+	// startAPI();
 };
 
 main().catch((e) => {
