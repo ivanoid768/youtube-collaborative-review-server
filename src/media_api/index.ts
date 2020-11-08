@@ -1,12 +1,14 @@
 import { getSingleton, IceCandidateEvent } from 'kurento-client';
 
 export const startMediaServer = async () => {
-    let client = await getSingleton('ws://127.0.0.1:8888/kurento',{})
+    let client = await getSingleton('ws://127.0.0.1:8888/kurento', {})
     let server = await client.getServerManager()
     let resp = await server.getName()
     console.log('server_name: ', resp);
 
     let pipeline = await client.create('MediaPipeline')
+    let dispatcher = await pipeline.create('Dispatcher')
+    console.log('dispatcher', dispatcher.id);
 
     let rtcEnd = await pipeline.create('WebRtcEndpoint')
     console.log('rtcEnd: ', rtcEnd.id);
