@@ -7,8 +7,8 @@ export const startMediaServer = async () => {
     console.log('server_name: ', resp);
 
     let pipeline = await client.create('MediaPipeline')
-    let dispatcher = await pipeline.create('Dispatcher')
-    console.log('dispatcher', dispatcher.id);
+    // let dispatcher = await pipeline.create('Dispatcher')
+    // console.log('dispatcher', dispatcher.id);
 
     let rtcEnd = await pipeline.create('WebRtcEndpoint')
     console.log('rtcEnd: ', rtcEnd.id);
