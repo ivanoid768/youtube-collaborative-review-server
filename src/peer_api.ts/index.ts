@@ -1,16 +1,15 @@
 import express, { json, urlencoded } from 'express';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
-import { customAlphabet, urlAlphabet, } from 'nanoid';
 import { ExpressPeerServer } from 'peer';
 import { env } from 'process';
 import cors, { CorsOptions } from 'cors';
+import { RoomRouter } from './rooms';
 
 export const startPeerToPeerServer = async () => {
     const app = express()
     const server = createServer(app)
     const io = new Server(server)
-    const nanoid = customAlphabet(urlAlphabet, 21)
 
     app.use(urlencoded({extended: true}));
     app.use(json());
@@ -29,15 +28,7 @@ export const startPeerToPeerServer = async () => {
 
     app.use('/peerjs', peerServer);
 
-    app.get('/', (_req, res) => {
-        res.redirect(`/${nanoid()}`)
-    })
-
-    app.get('/:room', (req, res) => {
-        console.log('roomId', req.params.room);
-
-        res.render('room', { roomId: req.params.room })
-    })
+    app.use('/room', RoomRouter)
 
     io.on('connection', (socket: Socket) => {
         console.log('conn: ', socket.id);
