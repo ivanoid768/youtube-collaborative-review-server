@@ -1,48 +1,46 @@
 import { Router } from "express";
 import { nanoid } from "nanoid";
-import { users } from "../db";
+import { IUser, users } from "../db";
 import { generateId } from "./id_generator";
 
 const router = Router();
 
 interface ICreateRoomInput {
-	userId?: string;
+	accessKey?: string;
 	userNickname?: string;
 }
 
-router.post<any, any, ICreateRoomInput>('/create', async (req, res) => {
+router.post<any, {roomId: string, accessKey: string}, ICreateRoomInput>('/create', async (req, res) => {
 	const input = req.body;
-	let userId = input.userId;
 
-	createUserIfNotExists(userId, input.userNickname)
+	let user = createUserIfNotExists(input.accessKey, input.userNickname)
 
-	return res.status(201).send({ roomId: generateId() })
+	return res.status(201).send({ roomId: generateId(), accessKey: user.accessKey })
 });
 
-router.post<{id: string}, any, ICreateRoomInput>('/:id', async (req, res) => {
+router.post<{id: string}, {roomId: string, accessKey: string}, ICreateRoomInput>('/:id', async (req, res) => {
 	const input = req.body;
-	let userId = input.userId;
 
-	createUserIfNotExists(userId, input.userNickname)
+	let user = createUserIfNotExists(input.accessKey, input.userNickname)
 
-	return res.status(200).send({ roomId: req.params.id })
+	return res.status(200).send({ roomId: req.params.id, accessKey: user.accessKey })
 });
 
-function createUserIfNotExists(userId?: string, nickname?: string) {
-	if (!userId) {
-		userId = generateId()
-		users.set(userId, { nickname: nickname || 'guest_' + nanoid(4) })
+function createUserIfNotExists(accessKey?: string, nickname?: string) {
+	if (!accessKey) {
+		accessKey = generateId()
+		users.set(accessKey, { accessKey: accessKey, nickname: nickname || 'guest_' + nanoid(4), id: generateId() })
 
-		return users.get(userId)
+		return users.get(accessKey) as IUser;
 	}
 
-	let user = users.get(userId)
+	let user = users.get(accessKey)
 
 	if (!user) {
-		userId = generateId()
-		users.set(userId, { nickname: nickname || 'guest_' + nanoid(4) })
+		accessKey = generateId()
+		users.set(accessKey, { accessKey: accessKey, nickname: nickname || 'guest_' + nanoid(4), id: generateId() })
 
-		return users.get(userId)
+		return users.get(accessKey) as IUser;
 	}
 
 	return user;

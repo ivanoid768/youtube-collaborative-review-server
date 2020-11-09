@@ -5,16 +5,17 @@ import { ExpressPeerServer } from 'peer';
 import { env } from 'process';
 import cors, { CorsOptions } from 'cors';
 import { RoomRouter } from './rooms';
+import { users } from '../db';
 
 export const startPeerToPeerServer = async () => {
     const app = express()
     const server = createServer(app)
     const io = new Server(server)
 
-    app.use(urlencoded({extended: true}));
+    app.use(urlencoded({ extended: true }));
     app.use(json());
 
-    const corsOptions: CorsOptions = {origin: env.CORS_ORIGIN || '*'};
+    const corsOptions: CorsOptions = { origin: env.CORS_ORIGIN || '*' };
     app.use(cors(corsOptions))
 
     app.set('view engine', 'ejs')
@@ -33,22 +34,24 @@ export const startPeerToPeerServer = async () => {
     io.on('connection', (socket: Socket) => {
         console.log('conn: ', socket.id);
 
-        socket.on('join-room', (roomId, userId) => {
-            console.log(roomId, userId);
+        socket.on('join-room', (roomId, peerId, accessKey: string) => {
+            console.log(roomId, peerId, accessKey);
+
+            let user = users.get(accessKey)
+            let userData = { ...user, accessKey: '' }
 
             socket.join(roomId)
-            socket.to(roomId).broadcast.emit('user-connected', userId)
+            socket.to(roomId).broadcast.emit('user-connected', peerId, userData)
 
             socket.on('disconnect', () => {
-                socket.to(roomId).broadcast.emit('user-disconnected', userId)
+                socket.to(roomId).broadcast.emit('user-disconnected', peerId, userData)
             })
         })
     })
 
-    let the_port = 4001;
-
-    server.listen(the_port, () => {
-        console.log(`http://localhost:${the_port} is listening...`);
+    const THE_PORT = 4001;
+    server.listen(THE_PORT, () => {
+        console.log(`http://localhost:${THE_PORT} is listening...`);
     })
 }
 
