@@ -1,8 +1,10 @@
-import express from 'express';
+import express, { json, urlencoded } from 'express';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { customAlphabet, urlAlphabet, } from 'nanoid';
-import { PeerServer } from 'peer';
+import { ExpressPeerServer } from 'peer';
+import { env } from 'process';
+import cors, { CorsOptions } from 'cors';
 
 export const startPeerToPeerServer = async () => {
     const app = express()
@@ -10,14 +12,22 @@ export const startPeerToPeerServer = async () => {
     const io = new Server(server)
     const nanoid = customAlphabet(urlAlphabet, 21)
 
-    const peerServer = PeerServer({ port: 9001 });
+    app.use(urlencoded({extended: true}));
+    app.use(json());
+
+    const corsOptions: CorsOptions = {origin: env.CORS_ORIGIN || '*'};
+    app.use(cors(corsOptions))
+
+    app.set('view engine', 'ejs')
+    app.use(express.static('public'))
+
+    const peerServer = ExpressPeerServer(server);
 
     peerServer.on('error', error => {
         console.log('peer_error', error.message);
     })
 
-    app.set('view engine', 'ejs')
-    app.use(express.static('public'))
+    app.use('/peerjs', peerServer);
 
     app.get('/', (_req, res) => {
         res.redirect(`/${nanoid()}`)
@@ -44,7 +54,11 @@ export const startPeerToPeerServer = async () => {
         })
     })
 
-    server.listen(4001, () => {
-        console.log('server...', 4001);
+    let the_port = 4001;
+
+    server.listen(the_port, () => {
+        console.log(`http://localhost:${the_port} is listening...`);
     })
 }
+
+// ts-node-dev ver. 1.0.0 (using ts-node ver. 9.0.0, typescript ver. 3.9.7)
