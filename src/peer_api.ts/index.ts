@@ -6,6 +6,7 @@ import { env } from 'process';
 import cors, { CorsOptions } from 'cors';
 import { RoomRouter } from './rooms';
 import { users } from '../db';
+import { playerIORouter } from './player';
 
 export const startPeerToPeerServer = async () => {
     const app = express()
@@ -33,6 +34,8 @@ export const startPeerToPeerServer = async () => {
 
     io.on('connection', (socket: Socket) => {
         console.log('conn: ', socket.id);
+
+        playerIORouter(socket)
 
         socket.on('join-room', (roomId, peerId, accessKey: string) => {
             console.log(roomId, peerId, accessKey);
