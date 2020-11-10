@@ -19,4 +19,3 @@ export function playerIORouter(socket: Socket) {
         socket.to(roomId).broadcast.emit('roommate-player-event', userId, playerEvent)
     })
 }
-
